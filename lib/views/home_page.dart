@@ -6,6 +6,7 @@ import 'package:absen_sqflite/theme/theme_provider.dart';
 import 'package:absen_sqflite/views/history_page.dart';
 import 'package:absen_sqflite/views/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -153,18 +154,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       // backgroundColor: Color(0xFFF4F6F8),
       appBar: AppBar(
-        // actions: [
-        //   Consumer<ThemeProvider>(
-        //     builder: (context, provider, _) {
-        //       return Switch(
-        //         value: provider.isDarkMode,
-        //         onChanged: (_) => provider.toggleTheme(),
-        //         activeColor: Colors.white,
-        //       );
-        //     },
-        //   ),
-        //   IconButton(onPressed: _logout, icon: Icon(Icons.logout)),
-        // ],
         title: Text("Dashboard Absensi"),
         backgroundColor: Colors.indigo[600],
         actions: [
@@ -211,6 +200,56 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               SizedBox(height: 24),
+              FutureBuilder<Position>(
+                future: Geolocator.getCurrentPosition(
+                  desiredAccuracy: LocationAccuracy.high,
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return const Text('Gagal mendapatkan lokasi');
+                  } else if (snapshot.hasData) {
+                    final position = snapshot.data!;
+                    return Container(
+                      height: 200,
+                      margin: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: Colors.indigo, width: 2),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(
+                              position.latitude,
+                              position.longitude,
+                            ),
+                            zoom: 16,
+                          ),
+                          markers: {
+                            Marker(
+                              markerId: const MarkerId('currentLocation'),
+                              position: LatLng(
+                                position.latitude,
+                                position.longitude,
+                              ),
+                              infoWindow: const InfoWindow(
+                                title: 'Lokasi Saya',
+                              ),
+                            ),
+                          },
+                          myLocationEnabled: true,
+                          zoomControlsEnabled: true,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return const Text('Tidak ada data lokasi');
+                  }
+                },
+              ),
 
               /// === KARTU TOMBOL ABSEN ===
               Card(

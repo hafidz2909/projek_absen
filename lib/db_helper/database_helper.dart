@@ -62,6 +62,19 @@ class DatabaseHelper {
     return null;
   }
 
+  Future<UserModel?> getUserById(int userId) async {
+    final db = await database;
+    final result = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+    if (result.isNotEmpty) {
+      return UserModel.fromMap(result.first);
+    }
+    return null;
+  }
+
   Future<int> insertAbsensi(AbsensiModel data) async {
     final db = await database;
     return await db.insert('absensi', data.toMap());

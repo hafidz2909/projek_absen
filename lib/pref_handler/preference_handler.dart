@@ -1,10 +1,13 @@
+import 'package:absen_sqflite/models/model_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefsHelper {
-  static Future<void> saveUserSession(int userId, String userName) async {
+  static Future<void> saveUserSession(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('userId', userId);
-    await prefs.setString('userName', userName);
+    await prefs.setInt('userId', user.id!);
+    await prefs.setString('userName', user.name);
+    await prefs.setString('userEmail', user.email);
+    await prefs.setString('userPassword', user.password);
   }
 
   static Future<int?> getUserId() async {
@@ -12,9 +15,17 @@ class SharedPrefsHelper {
     return prefs.getInt('userId');
   }
 
-  static Future<String?> getUserName() async {
+  static Future<UserModel?> getUserSession() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userName');
+    final id = prefs.getInt('userId');
+    final name = prefs.getString('userName');
+    final email = prefs.getString('userEmail');
+    final password = prefs.getString('userPassword');
+
+    if (id != null && name != null && email != null && password != null) {
+      return UserModel(id: id, name: name, email: email, password: password);
+    }
+    return null;
   }
 
   static Future<void> clearSession() async {

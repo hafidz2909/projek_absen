@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     final user = await dbHelper.getUser(email, password);
 
     if (user != null) {
-      await SharedPrefsHelper.saveUserSession(user.id!, user.name);
+      await SharedPrefsHelper.saveUserSession(user);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => HomePage(user: user)),
